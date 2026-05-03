@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,28 +12,33 @@ public class Wave
     public float spawnInterval;
     public int numberOfPowerUp;
     public int numberOfStunPower;
+    public int numberOfCoins;
 }
 
 public class WaveSpawnManager : MonoBehaviour
 {
     public List<Wave> waves;
     public Transform[] spawnPoints;
+    public int defaultCoinsPerWave = 3;
+    public bool useLevelNumberForCoinDrop = true;
+    public int coinsPerLevel = 3;
 
     [Header("Prefabs")]
     public GameObject enemyPrefab;
     public GameObject powerUpPrefab;
     public GameObject stunPowerPrefab;
+    public GameObject coinPrefab;
 
     [Header("Level Completion")]
-    [Tooltip("ลากจุดเส้นชัย (ที่มีสคริปต์ LevelFinish) มาใส่ตรงนี้")]
+    [Tooltip("Drag the finish portal object that has LevelFinish here.")]
     public GameObject finishPortal;
 
     [Header("Item Spawn Settings")]
-    [Tooltip("ระยะการสุ่มแกน X (ซ้าย-ขวา)")]
+    [Tooltip("Random spawn range on the X axis.")]
     public float spawnRangeX = 9.0f;
-    [Tooltip("ระยะการสุ่มแกน Z (หน้า-หลัง)")]
+    [Tooltip("Random spawn range on the Z axis.")]
     public float spawnRangeZ = 9.0f;
-    [Tooltip("ความสูงที่ไอเทมจะเกิด (แกน Y) ป้องกันการมุดดิน")]
+    [Tooltip("Item spawn height on the Y axis.")]
     public float spawnPosY = 0.5f;
 
     void Start()
@@ -42,7 +48,6 @@ public class WaveSpawnManager : MonoBehaviour
 
     IEnumerator SpawnWaves()
     {
-        // 1. ซ่อนเส้นชัยไว้ตั้งแต่เริ่มเกม
         if (finishPortal != null)
         {
             finishPortal.SetActive(false);
@@ -51,13 +56,13 @@ public class WaveSpawnManager : MonoBehaviour
         int waveIndex = 1;
         foreach (Wave wave in waves)
         {
-            Debug.Log($"เริ่ม Wave {waveIndex}");
+            Debug.Log($"Start Wave {waveIndex}");
 
             List<Transform> activePoints = GetRandomSpawnPoints(wave.numberOfRandomSpawnPoint);
 
             if (activePoints.Count == 0)
             {
-                Debug.LogError("Error: ไม่พบจุดเกิดศัตรู (Spawn Points)");
+                Debug.LogError("Error: no enemy spawn points found.");
                 yield break;
             }
 
@@ -73,19 +78,24 @@ public class WaveSpawnManager : MonoBehaviour
 
             yield return new WaitForSeconds(wave.delayStart);
 
-            // รอจนกว่าจะเสกศัตรูครบตามจำนวนในเวฟนั้น
             yield return StartCoroutine(SpawnEnemyRoutine(wave, activePoints));
 
-            // 2. [ส่วนที่เพิ่มเข้ามา] รอจนกว่าผู้เล่นจะฆ่าศัตรูตายเกลี้ยง ถึงจะผ่านเวฟนี้ได้
-            // (เป็นการบังคับว่าต้องเคลียร์ศัตรูให้หมดก่อน เวฟต่อไปถึงจะมา)
+            Debug.Log($"Wave {waveIndex} finished spawning. Drop coins.");
+
+            int coinsToDrop = GetCoinsToDrop(wave);
+            for (int i = 0; i < coinsToDrop; i++)
+            {
+                SpawnItemAtRandomPosition(coinPrefab, "Coin");
+            }
+
             yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("Enemy").Length == 0);
 
-            Debug.Log($"เคลียร์ Wave {waveIndex} สำเร็จ!");
+            Debug.Log($"Clear Wave {waveIndex}");
+
             waveIndex++;
         }
 
-        // 3. เมื่อลูป foreach ทำงานเสร็จ แปลว่าเคลียร์ครบทุกเวฟแล้ว! ให้เปิดเส้นชัยได้เลย
-        Debug.Log("เคลียร์ทุกเวฟแล้ว! ปรากฏเส้นชัย!");
+        Debug.Log("All waves cleared. Finish portal opened.");
         if (finishPortal != null)
         {
             finishPortal.SetActive(true);
@@ -101,6 +111,22 @@ public class WaveSpawnManager : MonoBehaviour
         }
     }
 
+    int GetCoinsToDrop(Wave wave)
+    {
+        if (useLevelNumberForCoinDrop)
+        {
+            int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+            return currentLevelIndex * coinsPerLevel;
+        }
+
+        if (wave.numberOfCoins > 0)
+        {
+            return wave.numberOfCoins;
+        }
+
+        return defaultCoinsPerWave;
+    }
+
     List<Transform> GetRandomSpawnPoints(int count)
     {
         List<Transform> selected = new List<Transform>();
@@ -113,12 +139,14 @@ public class WaveSpawnManager : MonoBehaviour
             selected.Add(pool[index]);
             pool.RemoveAt(index);
         }
+
         return selected;
     }
 
     void SpawnEnemyAtPoint(GameObject prefab, List<Transform> points)
     {
         if (points == null || points.Count == 0 || prefab == null) return;
+
         int index = Random.Range(0, points.Count);
         Instantiate(prefab, points[index].position, prefab.transform.rotation);
     }
@@ -132,7 +160,11 @@ public class WaveSpawnManager : MonoBehaviour
 
     void SpawnItemAtRandomPosition(GameObject prefab, string itemName)
     {
-        if (prefab == null) return;
+        if (prefab == null)
+        {
+            Debug.LogWarning($"{itemName} prefab is missing on WaveSpawnManager.");
+            return;
+        }
 
         Vector3 randomPos = GenerateRandomItemPosition();
         Instantiate(prefab, randomPos, prefab.transform.rotation);

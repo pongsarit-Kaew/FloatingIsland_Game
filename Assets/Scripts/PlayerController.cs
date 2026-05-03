@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,16 +8,15 @@ public class PlayerController : MonoBehaviour
     public Transform focalPoint;
     public bool hasPowerUp = false;
     public GameObject powerupIndicator;
+    public int coinCount = 0;
 
     private Rigidbody rb;
 
     private InputAction moveAction;
     private InputAction smashAction;
     private InputAction breakAction;
-    private Coroutine countdownRoutine; // เปลี่ยนจาก object เป็น Coroutine เพื่อให้หยุดเวลาได้ถูกต้อง
+    private Coroutine countdownRoutine;
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -27,26 +25,20 @@ public class PlayerController : MonoBehaviour
         breakAction = InputSystem.actions.FindAction("Break");
     }
 
-    // Update จัดการเรื่องภาพและเอฟเฟกต์ (ทำงานตามเฟรมเรตคอมพิวเตอร์)
     void Update()
     {
-        // อัปเดตตำแหน่งวงแหวน PowerUp ให้ตามตัวผู้เล่น
         if (powerupIndicator != null && powerupIndicator.activeSelf)
         {
             powerupIndicator.transform.position = transform.position + new Vector3(0, -0.5f, 0);
         }
     }
 
-    // FixedUpdate จัดการเรื่องแรงและฟิสิกส์ (ทำงานด้วยความเร็วคงที่เสมอ เท่ากันทุกเครื่อง!)
     void FixedUpdate()
     {
-        // 1. อ่านค่าปุ่มเดิน
         var move = moveAction.ReadValue<Vector2>();
 
-        // 2. ออกแรงผลักลูกบอล
         rb.AddForce(move.y * speed * focalPoint.forward);
 
-        // 3. ระบบเบรก
         if (breakAction.IsPressed())
         {
             rb.linearVelocity = Vector3.zero;
@@ -74,11 +66,11 @@ public class PlayerController : MonoBehaviour
             powerupIndicator.SetActive(true);
             Destroy(other.gameObject);
 
-            // ถ้าระบบกำลังนับเวลา PowerUp อันเก่าอยู่ ให้สั่งหยุดก่อน แล้วค่อยเริ่มนับ 10 วิใหม่
             if (countdownRoutine != null)
             {
                 StopCoroutine(countdownRoutine);
             }
+
             countdownRoutine = StartCoroutine(PowerUpCountDown());
         }
     }
@@ -88,5 +80,11 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(10f);
         hasPowerUp = false;
         powerupIndicator.SetActive(false);
+    }
+
+    public void AddCoin(int amount)
+    {
+        coinCount += amount;
+        Debug.Log($"Coin: {coinCount}");
     }
 }

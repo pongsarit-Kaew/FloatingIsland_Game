@@ -422,6 +422,67 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 139493985dd314f49bf964908e805095, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelFinish
+--- !u!1001 &763342806
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3707735288192851801, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_Name
+      value: DollarSign
+      objectReference: {fileID: 0}
+    - target: {fileID: 3707735288192851801, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.8561
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.65736
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.60845
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8138700212283663054, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
 --- !u!4 &986176838 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1804024871360419069, guid: bb420f9ac2083cd4ea138531408225e7, type: 3}
@@ -902,6 +963,7 @@ MonoBehaviour:
   focalPoint: {fileID: 1163683541}
   hasPowerUp: 0
   powerupIndicator: {fileID: 1540850572}
+  coinCount: 0
 --- !u!54 &1231960639
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1447,6 +1509,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 1
     numberOfStunPower: 1
+    numberOfCoins: 3
   spawnPoints:
   - {fileID: 1455485778}
   - {fileID: 1934027255}
@@ -1454,9 +1517,11 @@ MonoBehaviour:
   - {fileID: 190401264}
   - {fileID: 1176266729}
   - {fileID: 1651429377}
+  defaultCoinsPerWave: 3
   enemyPrefab: {fileID: 8279026461862980053, guid: bb420f9ac2083cd4ea138531408225e7, type: 3}
   powerUpPrefab: {fileID: 3709808119504899638, guid: 8cd96a1609dc5a04f8f54162c32cab4a, type: 3}
   stunPowerPrefab: {fileID: 7315462932485330382, guid: 6a818e12bcf65ac43a46625f7822f9e5, type: 3}
+  coinPrefab: {fileID: 3707735288192851801, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
   finishPortal: {fileID: 0}
   spawnRangeX: 9
   spawnRangeZ: 9
@@ -1621,6 +1686,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 1
     numberOfStunPower: 1
+    numberOfCoins: 0
   spawnPoints:
   - {fileID: 1455485778}
   - {fileID: 1934027255}
@@ -1628,9 +1694,11 @@ MonoBehaviour:
   - {fileID: 190401264}
   - {fileID: 1176266729}
   - {fileID: 1651429377}
+  defaultCoinsPerWave: 3
   enemyPrefab: {fileID: 8279026461862980053, guid: bb420f9ac2083cd4ea138531408225e7, type: 3}
   powerUpPrefab: {fileID: 3709808119504899638, guid: 8cd96a1609dc5a04f8f54162c32cab4a, type: 3}
   stunPowerPrefab: {fileID: 7315462932485330382, guid: 6a818e12bcf65ac43a46625f7822f9e5, type: 3}
+  coinPrefab: {fileID: 3707735288192851801, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
   finishPortal: {fileID: 636296030}
   spawnRangeX: 9
   spawnRangeZ: 9
@@ -1793,6 +1861,7 @@ SceneRoots:
   - {fileID: 1531953839}
   - {fileID: 1231960637}
   - {fileID: 3719106897102879943}
+  - {fileID: 763342806}
   - {fileID: 16642537}
   - {fileID: 417334804}
   - {fileID: 1623217340}
