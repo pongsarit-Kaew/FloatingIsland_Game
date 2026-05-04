@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class PlayerController : MonoBehaviour
     public bool hasPowerUp = false;
     public GameObject powerupIndicator;
     public int coinCount = 0;
+    public int bonusCoinCount = 0;
+    public float deathY = -10f;
 
     private Rigidbody rb;
 
@@ -30,6 +33,11 @@ public class PlayerController : MonoBehaviour
         if (powerupIndicator != null && powerupIndicator.activeSelf)
         {
             powerupIndicator.transform.position = transform.position + new Vector3(0, -0.5f, 0);
+        }
+
+        if (transform.position.y < deathY)
+        {
+            RestartLevel();
         }
     }
 
@@ -84,7 +92,25 @@ public class PlayerController : MonoBehaviour
 
     public void AddCoin(int amount)
     {
-        coinCount += amount;
-        Debug.Log($"Coin: {coinCount}");
+        AddCoin(amount, false);
+    }
+
+    public void AddCoin(int amount, bool isBonusCoin)
+    {
+        if (isBonusCoin)
+        {
+            bonusCoinCount += amount;
+        }
+        else
+        {
+            coinCount += amount;
+        }
+
+        Debug.Log($"Coin: {coinCount} Bonus: {bonusCoinCount}");
+    }
+
+    void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

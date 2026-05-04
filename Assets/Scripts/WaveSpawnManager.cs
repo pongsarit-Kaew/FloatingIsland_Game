@@ -13,6 +13,7 @@ public class Wave
     public int numberOfPowerUp;
     public int numberOfStunPower;
     public int numberOfCoins;
+    public int numberOfBonusCoins;
 }
 
 public class WaveSpawnManager : MonoBehaviour
@@ -22,16 +23,22 @@ public class WaveSpawnManager : MonoBehaviour
     public int defaultCoinsPerWave = 3;
     public bool useLevelNumberForCoinDrop = true;
     public int coinsPerLevel = 3;
+    public bool addLevelBonusCoinsToLastWave = true;
+    public int bonusCoinsPerLevel = 1;
+    public int bonusCoinsOverride = 0;
 
     [Header("Prefabs")]
     public GameObject enemyPrefab;
     public GameObject powerUpPrefab;
     public GameObject stunPowerPrefab;
     public GameObject coinPrefab;
+    public GameObject bonusCoinPrefab;
 
     [Header("Level Completion")]
     [Tooltip("Drag the finish portal object that has LevelFinish here.")]
     public GameObject finishPortal;
+    [Tooltip("Use this only when a level needs a custom coin requirement. Keep 0 to auto-calculate.")]
+    public int requiredCoinsOverride = 0;
 
     [Header("Item Spawn Settings")]
     [Tooltip("Random spawn range on the X axis.")]
@@ -53,9 +60,12 @@ public class WaveSpawnManager : MonoBehaviour
             finishPortal.SetActive(false);
         }
 
-        int waveIndex = 1;
-        foreach (Wave wave in waves)
+        for (int waveListIndex = 0; waveListIndex < waves.Count; waveListIndex++)
         {
+            Wave wave = waves[waveListIndex];
+            int waveIndex = waveListIndex + 1;
+            bool isLastWave = waveListIndex == waves.Count - 1;
+
             Debug.Log($"Start Wave {waveIndex}");
 
             List<Transform> activePoints = GetRandomSpawnPoints(wave.numberOfRandomSpawnPoint);
@@ -80,22 +90,29 @@ public class WaveSpawnManager : MonoBehaviour
 
             yield return StartCoroutine(SpawnEnemyRoutine(wave, activePoints));
 
-            Debug.Log($"Wave {waveIndex} finished spawning. Drop coins.");
-
-            int coinsToDrop = GetCoinsToDrop(wave);
-            for (int i = 0; i < coinsToDrop; i++)
-            {
-                SpawnItemAtRandomPosition(coinPrefab, "Coin");
-            }
-
             yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("Enemy").Length == 0);
 
             Debug.Log($"Clear Wave {waveIndex}");
 
-            waveIndex++;
+            int coinsToDrop = GetBaseCoinsToDrop(wave);
+            int bonusCoinsToDrop = GetBonusCoinsToDrop(wave, isLastWave);
+            Debug.Log($"Wave {waveIndex} completed. Drop {coinsToDrop} coins and {bonusCoinsToDrop} bonus coins.");
+            for (int coinIndex = 0; coinIndex < coinsToDrop; coinIndex++)
+            {
+                SpawnCoinAtRandomPosition(false);
+            }
+
+            for (int bonusCoinIndex = 0; bonusCoinIndex < bonusCoinsToDrop; bonusCoinIndex++)
+            {
+                SpawnCoinAtRandomPosition(true);
+            }
         }
 
-        Debug.Log("All waves cleared. Finish portal opened.");
+        int requiredCoins = GetRequiredCoins();
+        Debug.Log($"All waves cleared. Waiting for {requiredCoins} coins before opening finish portal.");
+        yield return new WaitUntil(() => HasPlayerCollectedRequiredCoins(requiredCoins));
+
+        Debug.Log("Coin requirement met. Finish portal opened.");
         if (finishPortal != null)
         {
             finishPortal.SetActive(true);
@@ -111,12 +128,11 @@ public class WaveSpawnManager : MonoBehaviour
         }
     }
 
-    int GetCoinsToDrop(Wave wave)
+    int GetBaseCoinsToDrop(Wave wave)
     {
         if (useLevelNumberForCoinDrop)
         {
-            int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
-            return currentLevelIndex * coinsPerLevel;
+            return GetRequiredCoins();
         }
 
         if (wave.numberOfCoins > 0)
@@ -125,6 +141,50 @@ public class WaveSpawnManager : MonoBehaviour
         }
 
         return defaultCoinsPerWave;
+    }
+
+    int GetBonusCoinsToDrop(Wave wave, bool isLastWave)
+    {
+        int bonusCoins = wave.numberOfBonusCoins;
+        if (addLevelBonusCoinsToLastWave && isLastWave)
+        {
+            bonusCoins += GetLevelBonusCoins();
+        }
+
+        return bonusCoins;
+    }
+
+    int GetRequiredCoins()
+    {
+        if (requiredCoinsOverride > 0)
+        {
+            return requiredCoinsOverride;
+        }
+
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        return currentLevelIndex * coinsPerLevel;
+    }
+
+    int GetLevelBonusCoins()
+    {
+        if (bonusCoinsOverride > 0)
+        {
+            return bonusCoinsOverride;
+        }
+
+        int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
+        return currentLevelIndex * bonusCoinsPerLevel;
+    }
+
+    bool HasPlayerCollectedRequiredCoins(int requiredCoins)
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null) return false;
+
+        PlayerController player = playerObject.GetComponent<PlayerController>();
+        if (player == null) return false;
+
+        return player.coinCount >= requiredCoins;
     }
 
     List<Transform> GetRandomSpawnPoints(int count)
@@ -158,16 +218,30 @@ public class WaveSpawnManager : MonoBehaviour
         return new Vector3(randomX, spawnPosY, randomZ);
     }
 
-    void SpawnItemAtRandomPosition(GameObject prefab, string itemName)
+    void SpawnCoinAtRandomPosition(bool isBonusCoin)
+    {
+        GameObject prefab = isBonusCoin && bonusCoinPrefab != null ? bonusCoinPrefab : coinPrefab;
+        GameObject spawnedCoin = SpawnItemAtRandomPosition(prefab, isBonusCoin ? "Bonus Coin" : "Coin");
+        if (spawnedCoin == null) return;
+
+        Coin coin = spawnedCoin.GetComponent<Coin>();
+        if (coin != null)
+        {
+            coin.isBonusCoin = isBonusCoin;
+        }
+    }
+
+    GameObject SpawnItemAtRandomPosition(GameObject prefab, string itemName)
     {
         if (prefab == null)
         {
             Debug.LogWarning($"{itemName} prefab is missing on WaveSpawnManager.");
-            return;
+            return null;
         }
 
         Vector3 randomPos = GenerateRandomItemPosition();
-        Instantiate(prefab, randomPos, prefab.transform.rotation);
+        GameObject spawnedItem = Instantiate(prefab, randomPos, prefab.transform.rotation);
         Debug.Log($"{itemName} {randomPos}");
+        return spawnedItem;
     }
 }

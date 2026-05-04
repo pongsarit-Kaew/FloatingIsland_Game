@@ -105,6 +105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   value: 1
+  isBonusCoin: 0
 --- !u!65 &-5328064673124175066
 BoxCollider:
   m_ObjectHideFlags: 0

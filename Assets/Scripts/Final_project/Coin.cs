@@ -3,6 +3,7 @@ using UnityEngine;
 public class Coin : MonoBehaviour
 {
     public int value = 1;
+    public bool isBonusCoin = false;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -11,7 +12,7 @@ public class Coin : MonoBehaviour
         PlayerController player = other.GetComponent<PlayerController>();
         if (player != null)
         {
-            player.AddCoin(value);
+            player.AddCoin(value, isBonusCoin);
         }
 
         Destroy(gameObject);
