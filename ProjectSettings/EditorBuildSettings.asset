@@ -13,13 +13,10 @@ EditorBuildSettings:
     guid: a4b96ad7a65484fd4a83cb97540eee50
   - enabled: 1
     path: Assets/Scenes/FloatingIsland_L2.unity
-    guid: c4cc1d176a4e2814583b8c90a78fa07a
+    guid: 7bd5a7b2e08dc6b4784dd7f279541698
   - enabled: 1
     path: Assets/Scenes/FloatingIsland_L3.unity
-    guid: 09f6797e7d20ef441b1cbf61226d9a6d
-  - enabled: 1
-    path: Assets/Scenes/FloatingIsland_L4.unity
-    guid: b2d0cc66f45a21e4ca77d29c1a25ffdf
+    guid: ac0145a615c7cd44d80ea2836cfbd7f8
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 289c1b55c9541489481df5cc06664110, type: 3}
   m_UseUCBPForAssetBundles: 0
