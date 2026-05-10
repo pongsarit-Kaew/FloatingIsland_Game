@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     public int coinCount = 0;
     public int bonusCoinCount = 0;
     public float deathY = -10f;
+    public bool canMove = true;
 
     private Rigidbody rb;
 
@@ -43,6 +44,12 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!canMove)
+        {
+            rb.linearVelocity = Vector3.zero;
+            return;
+        }
+
         var move = moveAction.ReadValue<Vector2>();
 
         rb.AddForce(move.y * speed * focalPoint.forward);

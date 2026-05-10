@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 [System.Serializable]
 public class Wave
@@ -18,6 +19,8 @@ public class Wave
 
 public class WaveSpawnManager : MonoBehaviour
 {
+    public static bool GameHasStarted { get; private set; } = true;
+
     public List<Wave> waves;
     public Transform[] spawnPoints;
     public int defaultCoinsPerWave = 3;
@@ -48,8 +51,14 @@ public class WaveSpawnManager : MonoBehaviour
     [Tooltip("Item spawn height on the Y axis.")]
     public float spawnPosY = 0.5f;
 
+    [Header("Start Countdown")]
+    public float startCountdownDuration = 3f;
+    public TMP_Text startCountdownText;
+    public bool lockPlayerDuringStartCountdown = true;
+
     void Start()
     {
+        GameHasStarted = false;
         StartCoroutine(SpawnWaves());
     }
 
@@ -59,6 +68,8 @@ public class WaveSpawnManager : MonoBehaviour
         {
             finishPortal.SetActive(false);
         }
+
+        yield return StartCoroutine(RunStartCountdown());
 
         for (int waveListIndex = 0; waveListIndex < waves.Count; waveListIndex++)
         {
@@ -243,5 +254,82 @@ public class WaveSpawnManager : MonoBehaviour
         GameObject spawnedItem = Instantiate(prefab, randomPos, prefab.transform.rotation);
         Debug.Log($"{itemName} {randomPos}");
         return spawnedItem;
+    }
+
+    IEnumerator RunStartCountdown()
+    {
+        if (startCountdownDuration <= 0f) yield break;
+
+        PlayerController player = FindPlayer();
+        if (lockPlayerDuringStartCountdown && player != null)
+        {
+            player.canMove = false;
+        }
+
+        TMP_Text countdownText = GetOrCreateStartCountdownText();
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(true);
+        }
+
+        for (int secondsLeft = Mathf.CeilToInt(startCountdownDuration); secondsLeft > 0; secondsLeft--)
+        {
+            if (countdownText != null)
+            {
+                countdownText.text = secondsLeft.ToString();
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        if (countdownText != null)
+        {
+            countdownText.text = "GO!";
+            yield return new WaitForSeconds(0.5f);
+            countdownText.gameObject.SetActive(false);
+        }
+
+        if (lockPlayerDuringStartCountdown && player != null)
+        {
+            player.canMove = true;
+        }
+
+        GameHasStarted = true;
+    }
+
+    PlayerController FindPlayer()
+    {
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject == null) return null;
+
+        return playerObject.GetComponent<PlayerController>();
+    }
+
+    TMP_Text GetOrCreateStartCountdownText()
+    {
+        if (startCountdownText != null) return startCountdownText;
+
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null) return null;
+
+        GameObject textObject = new GameObject("StartCountdownText");
+        textObject.transform.SetParent(canvas.transform, false);
+
+        TextMeshProUGUI text = textObject.AddComponent<TextMeshProUGUI>();
+        text.alignment = TextAlignmentOptions.Center;
+        text.fontSize = 96;
+        text.fontStyle = FontStyles.Bold;
+        text.color = Color.white;
+        text.raycastTarget = false;
+
+        RectTransform rectTransform = text.rectTransform;
+        rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+        rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+        rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        rectTransform.anchoredPosition = Vector2.zero;
+        rectTransform.sizeDelta = new Vector2(300f, 140f);
+
+        startCountdownText = text;
+        return startCountdownText;
     }
 }

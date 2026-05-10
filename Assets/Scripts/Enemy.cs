@@ -4,14 +4,20 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public float speed = 3f;
+    public Color stunnedColor = Color.red;
+
     private Rigidbody rb;
     private GameObject player;
     private bool isStunned;
+    private Coroutine stunRoutine;
+    private Renderer[] renderers;
+    private Color[] originalColors;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         player = GameObject.Find("Player");
+        CacheOriginalColors();
     }
 
     void Start()
@@ -19,22 +25,18 @@ public class Enemy : MonoBehaviour
 
     }
 
-    // FixedUpdate จัดการเรื่องแรงและฟิสิกส์ (ทำงานด้วยความเร็วคงที่เสมอ)
     void FixedUpdate()
     {
-        // 1. เช็คก่อนว่าโดน Stun ไหม ถ้าโดนให้หยุดขยับ
+        if (!WaveSpawnManager.GameHasStarted) return;
         if (isStunned) return;
 
-        // 2. เดินพุ่งเข้าหา Player ด้วยความเร็วที่เสถียร
         Vector3 dir = player.transform.position - transform.position;
         dir.Normalize();
         rb.AddForce(dir * speed);
     }
 
-    // Update จัดการเรื่องทั่วไป (ทำงานตามเฟรมเรตคอมพิวเตอร์)
     void Update()
     {
-        // 3. ถ้าศัตรูโดนชนร่วงตกแมพ (ความสูง Y ต่ำกว่า -10) ให้ทำลายตัวเองทิ้งซะ!
         if (transform.position.y < -10f)
         {
             Destroy(gameObject);
@@ -45,13 +47,19 @@ public class Enemy : MonoBehaviour
     {
         if (gameObject.activeInHierarchy)
         {
-            StartCoroutine(StunRoutine(duration));
+            if (stunRoutine != null)
+            {
+                StopCoroutine(stunRoutine);
+            }
+
+            stunRoutine = StartCoroutine(StunRoutine(duration));
         }
     }
 
     IEnumerator StunRoutine(float duration)
     {
         isStunned = true;
+        SetEnemyColor(stunnedColor);
 
         if (rb != null)
         {
@@ -62,5 +70,44 @@ public class Enemy : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         isStunned = false;
+        RestoreOriginalColors();
+        stunRoutine = null;
+    }
+
+    void CacheOriginalColors()
+    {
+        renderers = GetComponentsInChildren<Renderer>();
+        originalColors = new Color[renderers.Length];
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            originalColors[i] = renderers[i].material.color;
+        }
+    }
+
+    void SetEnemyColor(Color color)
+    {
+        if (renderers == null) return;
+
+        foreach (Renderer enemyRenderer in renderers)
+        {
+            if (enemyRenderer != null)
+            {
+                enemyRenderer.material.color = color;
+            }
+        }
+    }
+
+    void RestoreOriginalColors()
+    {
+        if (renderers == null || originalColors == null) return;
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null)
+            {
+                renderers[i].material.color = originalColors[i];
+            }
+        }
     }
 }

@@ -1491,7 +1491,7 @@ MonoBehaviour:
   bonusCoinPrefab: {fileID: 3533272020005778413, guid: 61c9b15ac55cc4c449f541bf05f35c78, type: 3}
   finishPortal: {fileID: 636296030}
   requiredCoinsOverride: 0
-  spawnRangeX: 4
+  spawnRangeX: 7
   spawnRangeZ: 4
   spawnPosY: 1
 --- !u!4 &1756670256
