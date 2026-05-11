@@ -143,12 +143,7 @@ public class WaveSpawnManager : MonoBehaviour
 
     int GetBaseCoinsToDrop(Wave wave)
     {
-        if (wave.numberOfCoins > 0)
-        {
-            return wave.numberOfCoins;
-        }
-
-        return GetRequiredCoins();
+        return Mathf.Max(0, wave.numberOfCoins);
     }
 
     int GetRequiredCoins()

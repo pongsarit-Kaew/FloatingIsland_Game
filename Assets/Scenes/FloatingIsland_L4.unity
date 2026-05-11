@@ -1480,20 +1480,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnManager
   waves:
-  - totalSpawnEnemies: 4
+  - totalSpawnEnemies: 5
     numberOfRandomSpawnPoint: 3
     delayStart: 2
     spawnInterval: 1.5
     numberOfPowerUp: 0
     numberOfStunPower: 1
     numberOfCoins: 0
-  - totalSpawnEnemies: 6
+  - totalSpawnEnemies: 7
     numberOfRandomSpawnPoint: 4
     delayStart: 2
     spawnInterval: 1.5
     numberOfPowerUp: 1
+    numberOfStunPower: 0
+    numberOfCoins: 0
+  - totalSpawnEnemies: 9
+    numberOfRandomSpawnPoint: 5
+    delayStart: 2
+    spawnInterval: 1.5
+    numberOfPowerUp: 1
     numberOfStunPower: 1
-    numberOfCoins: 6
+    numberOfCoins: 0
+  - totalSpawnEnemies: 12
+    numberOfRandomSpawnPoint: 6
+    delayStart: 2
+    spawnInterval: 1.5
+    numberOfPowerUp: 1
+    numberOfStunPower: 1
+    numberOfCoins: 12
   spawnPoints:
   - {fileID: 1425950354}
   - {fileID: 1633903387}
@@ -1513,7 +1527,7 @@ MonoBehaviour:
   spawnRangeX: 4
   spawnRangeZ: 4
   spawnPosY: 0.5
-  minimumItemSpawnDistance: 1.5
+  minimumItemSpawnDistance: 2
   startCountdownDuration: 3
   startCountdownText: {fileID: 0}
   lockPlayerDuringStartCountdown: 1
