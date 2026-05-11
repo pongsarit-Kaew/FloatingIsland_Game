@@ -14,7 +14,6 @@ public class Wave
     public int numberOfPowerUp;
     public int numberOfStunPower;
     public int numberOfCoins;
-    public int numberOfBonusCoins;
 }
 
 public class WaveSpawnManager : MonoBehaviour
@@ -23,12 +22,10 @@ public class WaveSpawnManager : MonoBehaviour
 
     public List<Wave> waves;
     public Transform[] spawnPoints;
-    public int defaultCoinsPerWave = 3;
-    public bool useLevelNumberForCoinDrop = true;
+
+    [Header("Coin Rules")]
     public int coinsPerLevel = 3;
-    public bool addLevelBonusCoinsToLastWave = true;
     public int bonusCoinsPerLevel = 1;
-    public int bonusCoinsOverride = 0;
 
     [Header("Prefabs")]
     public GameObject enemyPrefab;
@@ -45,16 +42,20 @@ public class WaveSpawnManager : MonoBehaviour
 
     [Header("Item Spawn Settings")]
     [Tooltip("Random spawn range on the X axis.")]
-    public float spawnRangeX = 9.0f;
+    public float spawnRangeX = 4f;
     [Tooltip("Random spawn range on the Z axis.")]
-    public float spawnRangeZ = 9.0f;
+    public float spawnRangeZ = 4f;
     [Tooltip("Item spawn height on the Y axis.")]
     public float spawnPosY = 0.5f;
+    [Tooltip("Minimum distance between spawned items. Larger values spread items farther apart.")]
+    public float minimumItemSpawnDistance = 1.5f;
 
     [Header("Start Countdown")]
     public float startCountdownDuration = 3f;
     public TMP_Text startCountdownText;
     public bool lockPlayerDuringStartCountdown = true;
+
+    private readonly List<Vector3> availableItemSpawnPositions = new List<Vector3>();
 
     void Start()
     {
@@ -80,6 +81,7 @@ public class WaveSpawnManager : MonoBehaviour
             Debug.Log($"Start Wave {waveIndex}");
 
             List<Transform> activePoints = GetRandomSpawnPoints(wave.numberOfRandomSpawnPoint);
+            PrepareItemSpawnPositions();
 
             if (activePoints.Count == 0)
             {
@@ -106,7 +108,7 @@ public class WaveSpawnManager : MonoBehaviour
             Debug.Log($"Clear Wave {waveIndex}");
 
             int coinsToDrop = GetBaseCoinsToDrop(wave);
-            int bonusCoinsToDrop = GetBonusCoinsToDrop(wave, isLastWave);
+            int bonusCoinsToDrop = isLastWave ? GetLevelBonusCoins() : 0;
             Debug.Log($"Wave {waveIndex} completed. Drop {coinsToDrop} coins and {bonusCoinsToDrop} bonus coins.");
             for (int coinIndex = 0; coinIndex < coinsToDrop; coinIndex++)
             {
@@ -141,28 +143,12 @@ public class WaveSpawnManager : MonoBehaviour
 
     int GetBaseCoinsToDrop(Wave wave)
     {
-        if (useLevelNumberForCoinDrop)
-        {
-            return GetRequiredCoins();
-        }
-
         if (wave.numberOfCoins > 0)
         {
             return wave.numberOfCoins;
         }
 
-        return defaultCoinsPerWave;
-    }
-
-    int GetBonusCoinsToDrop(Wave wave, bool isLastWave)
-    {
-        int bonusCoins = wave.numberOfBonusCoins;
-        if (addLevelBonusCoinsToLastWave && isLastWave)
-        {
-            bonusCoins += GetLevelBonusCoins();
-        }
-
-        return bonusCoins;
+        return GetRequiredCoins();
     }
 
     int GetRequiredCoins()
@@ -178,11 +164,6 @@ public class WaveSpawnManager : MonoBehaviour
 
     int GetLevelBonusCoins()
     {
-        if (bonusCoinsOverride > 0)
-        {
-            return bonusCoinsOverride;
-        }
-
         int currentLevelIndex = SceneManager.GetActiveScene().buildIndex;
         return currentLevelIndex * bonusCoinsPerLevel;
     }
@@ -222,11 +203,45 @@ public class WaveSpawnManager : MonoBehaviour
         Instantiate(prefab, points[index].position, prefab.transform.rotation);
     }
 
-    Vector3 GenerateRandomItemPosition()
+    void PrepareItemSpawnPositions()
     {
-        float randomX = Random.Range(-spawnRangeX, spawnRangeX);
-        float randomZ = Random.Range(-spawnRangeZ, spawnRangeZ);
-        return new Vector3(randomX, spawnPosY, randomZ);
+        availableItemSpawnPositions.Clear();
+
+        float spacing = Mathf.Max(0.1f, minimumItemSpawnDistance);
+        for (float x = -spawnRangeX; x <= spawnRangeX; x += spacing)
+        {
+            for (float z = -spawnRangeZ; z <= spawnRangeZ; z += spacing)
+            {
+                availableItemSpawnPositions.Add(new Vector3(x, spawnPosY, z));
+            }
+        }
+
+        ShuffleItemSpawnPositions();
+    }
+
+    void ShuffleItemSpawnPositions()
+    {
+        for (int i = 0; i < availableItemSpawnPositions.Count; i++)
+        {
+            int randomIndex = Random.Range(i, availableItemSpawnPositions.Count);
+            Vector3 currentPosition = availableItemSpawnPositions[i];
+            availableItemSpawnPositions[i] = availableItemSpawnPositions[randomIndex];
+            availableItemSpawnPositions[randomIndex] = currentPosition;
+        }
+    }
+
+    bool TryGetRandomItemPosition(out Vector3 position)
+    {
+        if (availableItemSpawnPositions.Count == 0)
+        {
+            position = Vector3.zero;
+            return false;
+        }
+
+        int lastIndex = availableItemSpawnPositions.Count - 1;
+        position = availableItemSpawnPositions[lastIndex];
+        availableItemSpawnPositions.RemoveAt(lastIndex);
+        return true;
     }
 
     void SpawnCoinAtRandomPosition(bool isBonusCoin)
@@ -250,7 +265,12 @@ public class WaveSpawnManager : MonoBehaviour
             return null;
         }
 
-        Vector3 randomPos = GenerateRandomItemPosition();
+        if (!TryGetRandomItemPosition(out Vector3 randomPos))
+        {
+            Debug.LogWarning($"No free item spawn position left for {itemName}. Try lowering Minimum Item Spawn Distance or increasing Spawn Range X/Z.");
+            return null;
+        }
+
         GameObject spawnedItem = Instantiate(prefab, randomPos, prefab.transform.rotation);
         Debug.Log($"{itemName} {randomPos}");
         return spawnedItem;
