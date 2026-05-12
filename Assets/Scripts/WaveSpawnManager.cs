@@ -13,6 +13,7 @@ public class Wave
     public float spawnInterval;
     public int numberOfPowerUp;
     public int numberOfStunPower;
+    public int numberOfBulletPower;
     public int numberOfCoins;
 }
 
@@ -31,6 +32,7 @@ public class WaveSpawnManager : MonoBehaviour
     public GameObject enemyPrefab;
     public GameObject powerUpPrefab;
     public GameObject stunPowerPrefab;
+    public GameObject bulletPowerPrefab;
     public GameObject coinPrefab;
     public GameObject bonusCoinPrefab;
 
@@ -59,12 +61,28 @@ public class WaveSpawnManager : MonoBehaviour
 
     void Start()
     {
+        EnsureGameUIManager();
         GameHasStarted = false;
         StartCoroutine(SpawnWaves());
     }
 
+    void EnsureGameUIManager()
+    {
+        if (GameUIManager.Instance != null) return;
+
+        GameObject uiManagerObject = new GameObject("GameUIManager");
+        uiManagerObject.AddComponent<GameUIManager>();
+    }
+
     IEnumerator SpawnWaves()
     {
+        if (GameUIManager.Instance != null)
+        {
+            GameUIManager.Instance.SetLevel(SceneManager.GetActiveScene().buildIndex);
+            GameUIManager.Instance.SetWave(0, waves.Count);
+            yield return new WaitUntil(() => GameUIManager.Instance.StartConfirmed);
+        }
+
         if (finishPortal != null)
         {
             finishPortal.SetActive(false);
@@ -79,6 +97,10 @@ public class WaveSpawnManager : MonoBehaviour
             bool isLastWave = waveListIndex == waves.Count - 1;
 
             Debug.Log($"Start Wave {waveIndex}");
+            if (GameUIManager.Instance != null)
+            {
+                GameUIManager.Instance.SetWave(waveIndex, waves.Count);
+            }
 
             List<Transform> activePoints = GetRandomSpawnPoints(wave.numberOfRandomSpawnPoint);
             PrepareItemSpawnPositions();
@@ -97,6 +119,11 @@ public class WaveSpawnManager : MonoBehaviour
             for (int i = 0; i < wave.numberOfStunPower; i++)
             {
                 SpawnItemAtRandomPosition(stunPowerPrefab, "StunPower");
+            }
+
+            for (int i = 0; i < wave.numberOfBulletPower; i++)
+            {
+                SpawnItemAtRandomPosition(bulletPowerPrefab, "BulletPower");
             }
 
             yield return new WaitForSeconds(wave.delayStart);

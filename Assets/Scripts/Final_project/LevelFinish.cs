@@ -36,6 +36,15 @@ public class LevelFinish : MonoBehaviour
         Debug.Log("Level complete. Saving progress...");
         GiveLevelCompleteBonus(player);
         UnlockNextLevel();
+
+        if (GameUIManager.Instance != null)
+        {
+            GameUIManager.Instance.ShowLevelComplete(player);
+        }
+        else
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     int GetRequiredCoins()
@@ -60,8 +69,6 @@ public class LevelFinish : MonoBehaviour
             PlayerPrefs.SetInt("UnlockedLevel", nextLevelIndex);
             PlayerPrefs.Save();
         }
-
-        SceneManager.LoadScene(0);
     }
 
     int GetBonusCoins()

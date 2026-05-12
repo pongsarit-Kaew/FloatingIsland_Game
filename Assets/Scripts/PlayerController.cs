@@ -13,19 +13,24 @@ public class PlayerController : MonoBehaviour
     public int bonusCoinCount = 0;
     public float deathY = -10f;
     public bool canMove = true;
+    public GameObject powerBulletPrefab;
+    public float powerBulletSpeed = 15f;
+    public float powerBulletFireInterval = 0.35f;
+    public float powerBulletLifeTime = 3f;
+    public float powerBulletSpawnDistance = 1.2f;
+    public int powerBulletCount = 8;
 
     private Rigidbody rb;
 
     private InputAction moveAction;
-    private InputAction smashAction;
     private InputAction breakAction;
     private Coroutine countdownRoutine;
+    private Coroutine bulletPowerRoutine;
 
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
         moveAction = InputSystem.actions.FindAction("Move");
-        smashAction = InputSystem.actions.FindAction("Smash");
         breakAction = InputSystem.actions.FindAction("Break");
     }
 
@@ -118,6 +123,87 @@ public class PlayerController : MonoBehaviour
 
     void RestartLevel()
     {
+        if (GameUIManager.Instance != null)
+        {
+            GameUIManager.Instance.ShowGameOver();
+            return;
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ActivateBulletPower(float duration)
+    {
+        if (bulletPowerRoutine != null)
+        {
+            StopCoroutine(bulletPowerRoutine);
+        }
+
+        bulletPowerRoutine = StartCoroutine(BulletPowerRoutine(duration));
+    }
+
+    IEnumerator BulletPowerRoutine(float duration)
+    {
+        float endTime = Time.time + duration;
+        while (Time.time < endTime)
+        {
+            ShootPowerBulletsAroundPlayer();
+            yield return new WaitForSeconds(powerBulletFireInterval);
+        }
+
+        bulletPowerRoutine = null;
+    }
+
+    void ShootPowerBulletsAroundPlayer()
+    {
+        int bulletCount = Mathf.Max(1, powerBulletCount);
+        for (int i = 0; i < bulletCount; i++)
+        {
+            float angle = i * 360f / bulletCount;
+            Vector3 direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+            ShootPowerBullet(direction);
+        }
+    }
+
+    void ShootPowerBullet(Vector3 shootDirection)
+    {
+        Vector3 spawnPosition = transform.position + shootDirection * powerBulletSpawnDistance + Vector3.up * 0.3f;
+        GameObject bulletObject = powerBulletPrefab != null
+            ? Instantiate(powerBulletPrefab, spawnPosition, Quaternion.LookRotation(shootDirection))
+            : CreateDefaultPowerBullet(spawnPosition);
+
+        PowerBullet bullet = bulletObject.GetComponent<PowerBullet>();
+        if (bullet == null)
+        {
+            bullet = bulletObject.AddComponent<PowerBullet>();
+        }
+
+        bullet.Launch(shootDirection, powerBulletSpeed, powerBulletLifeTime);
+    }
+
+    GameObject CreateDefaultPowerBullet(Vector3 spawnPosition)
+    {
+        GameObject bulletObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        bulletObject.name = "PowerBullet";
+        bulletObject.transform.position = spawnPosition;
+        bulletObject.transform.localScale = Vector3.one * 0.35f;
+
+        Renderer bulletRenderer = bulletObject.GetComponent<Renderer>();
+        if (bulletRenderer != null)
+        {
+            bulletRenderer.material.color = Color.cyan;
+        }
+
+        Collider bulletCollider = bulletObject.GetComponent<Collider>();
+        if (bulletCollider != null)
+        {
+            bulletCollider.isTrigger = true;
+        }
+
+        Rigidbody bulletRb = bulletObject.AddComponent<Rigidbody>();
+        bulletRb.useGravity = false;
+        bulletRb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        return bulletObject;
     }
 }

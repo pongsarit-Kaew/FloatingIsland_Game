@@ -914,6 +914,12 @@ MonoBehaviour:
   bonusCoinCount: 0
   deathY: -10
   canMove: 1
+  powerBulletPrefab: {fileID: 0}
+  powerBulletSpeed: 15
+  powerBulletFireInterval: 0.35
+  powerBulletLifeTime: 3
+  powerBulletSpawnDistance: 1.2
+  powerBulletCount: 8
 --- !u!54 &1231960639
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1486,6 +1492,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 0
     numberOfStunPower: 1
+    numberOfBulletPower: 0
     numberOfCoins: 0
   - totalSpawnEnemies: 7
     numberOfRandomSpawnPoint: 4
@@ -1493,6 +1500,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 1
     numberOfStunPower: 0
+    numberOfBulletPower: 1
     numberOfCoins: 0
   - totalSpawnEnemies: 9
     numberOfRandomSpawnPoint: 5
@@ -1500,6 +1508,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 1
     numberOfStunPower: 1
+    numberOfBulletPower: 1
     numberOfCoins: 9
   spawnPoints:
   - {fileID: 1425950354}
@@ -1513,6 +1522,7 @@ MonoBehaviour:
   enemyPrefab: {fileID: 8279026461862980053, guid: bb420f9ac2083cd4ea138531408225e7, type: 3}
   powerUpPrefab: {fileID: 3709808119504899638, guid: 8cd96a1609dc5a04f8f54162c32cab4a, type: 3}
   stunPowerPrefab: {fileID: 7315462932485330382, guid: 6a818e12bcf65ac43a46625f7822f9e5, type: 3}
+  bulletPowerPrefab: {fileID: 6847147581859620597, guid: fa83e8a1c25cb6449a9e5cff90508ded, type: 3}
   coinPrefab: {fileID: 3707735288192851801, guid: d659ba2acb2dae84eaa6543a4314b48c, type: 3}
   bonusCoinPrefab: {fileID: 3533272020005778413, guid: 61c9b15ac55cc4c449f541bf05f35c78, type: 3}
   finishPortal: {fileID: 636296030}
