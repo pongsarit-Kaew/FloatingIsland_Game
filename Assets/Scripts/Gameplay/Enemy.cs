@@ -20,11 +20,6 @@ public class Enemy : MonoBehaviour
         CacheOriginalColors();
     }
 
-    void Start()
-    {
-
-    }
-
     void FixedUpdate()
     {
         if (!WaveSpawnManager.GameHasStarted) return;

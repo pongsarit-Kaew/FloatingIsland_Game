@@ -4056,14 +4056,14 @@ MonoBehaviour:
     delayStart: 2
     spawnInterval: 1.5
     numberOfPowerUp: 0
-    numberOfStunPower: 0
+    numberOfStunPower: 1
     numberOfBulletPower: 1
     numberOfCoins: 0
   - totalSpawnEnemies: 12
     numberOfRandomSpawnPoint: 5
     delayStart: 2
     spawnInterval: 1.3
-    numberOfPowerUp: 0
+    numberOfPowerUp: 1
     numberOfStunPower: 0
     numberOfBulletPower: 1
     numberOfCoins: 0
@@ -4095,7 +4095,7 @@ MonoBehaviour:
   spawnRangeX: 4
   spawnRangeZ: 4
   spawnPosY: 0.5
-  minimumItemSpawnDistance: 1.5
+  minimumItemSpawnDistance: 2
   startCountdownDuration: 3
   startCountdownText: {fileID: 0}
   lockPlayerDuringStartCountdown: 1
