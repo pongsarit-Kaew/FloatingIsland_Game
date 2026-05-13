@@ -134,7 +134,7 @@ public class WaveSpawnManager : MonoBehaviour
 
             Debug.Log($"Clear Wave {waveIndex}");
 
-            int coinsToDrop = GetBaseCoinsToDrop(wave);
+            int coinsToDrop = isLastWave ? GetBaseCoinsToDrop(wave) : 0;
             int bonusCoinsToDrop = isLastWave ? GetLevelBonusCoins() : 0;
             Debug.Log($"Wave {waveIndex} completed. Drop {coinsToDrop} coins and {bonusCoinsToDrop} bonus coins.");
             for (int coinIndex = 0; coinIndex < coinsToDrop; coinIndex++)

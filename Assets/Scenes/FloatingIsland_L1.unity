@@ -4047,8 +4047,8 @@ MonoBehaviour:
     numberOfRandomSpawnPoint: 3
     delayStart: 2
     spawnInterval: 1.5
-    numberOfPowerUp: 1
-    numberOfStunPower: 1
+    numberOfPowerUp: 0
+    numberOfStunPower: 0
     numberOfBulletPower: 1
     numberOfCoins: 3
   spawnPoints:
