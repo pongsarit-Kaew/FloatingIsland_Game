@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public float powerBulletLifeTime = 3f;
     public float powerBulletSpawnDistance = 1.2f;
     public int powerBulletCount = 8;
+    public float powerUpDuration = 10f;
 
     private Rigidbody rb;
 
@@ -26,6 +27,9 @@ public class PlayerController : MonoBehaviour
     private InputAction breakAction;
     private Coroutine countdownRoutine;
     private Coroutine bulletPowerRoutine;
+    private float powerUpEndTime;
+    private float bulletPowerEndTime;
+    private float stunPowerEndTime;
 
     void Awake()
     {
@@ -45,6 +49,8 @@ public class PlayerController : MonoBehaviour
         {
             RestartLevel();
         }
+
+        UpdatePowerStatus();
     }
 
     void FixedUpdate()
@@ -83,6 +89,7 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("PowerUp"))
         {
             hasPowerUp = true;
+            powerUpEndTime = Time.time + powerUpDuration;
             powerupIndicator.SetActive(true);
             Destroy(other.gameObject);
 
@@ -93,11 +100,18 @@ public class PlayerController : MonoBehaviour
 
             countdownRoutine = StartCoroutine(PowerUpCountDown());
         }
+
+        if (other.CompareTag("StunPower"))
+        {
+            StunPower stunPower = other.GetComponent<StunPower>();
+            float stunDuration = stunPower != null ? stunPower.stunDuration : 3f;
+            stunPowerEndTime = Time.time + stunDuration;
+        }
     }
 
     IEnumerator PowerUpCountDown()
     {
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(powerUpDuration);
         hasPowerUp = false;
         powerupIndicator.SetActive(false);
     }
@@ -134,6 +148,8 @@ public class PlayerController : MonoBehaviour
 
     public void ActivateBulletPower(float duration)
     {
+        bulletPowerEndTime = Time.time + duration;
+
         if (bulletPowerRoutine != null)
         {
             StopCoroutine(bulletPowerRoutine);
@@ -152,6 +168,42 @@ public class PlayerController : MonoBehaviour
         }
 
         bulletPowerRoutine = null;
+    }
+
+    void UpdatePowerStatus()
+    {
+        if (GameUIManager.Instance == null) return;
+
+        string status = "";
+        if (hasPowerUp)
+        {
+            float powerUpTimeLeft = Mathf.Max(0f, powerUpEndTime - Time.time);
+            status += $"PowerUp: {powerUpTimeLeft:0.0}s";
+        }
+
+        if (bulletPowerRoutine != null)
+        {
+            float bulletTimeLeft = Mathf.Max(0f, bulletPowerEndTime - Time.time);
+            if (!string.IsNullOrEmpty(status))
+            {
+                status += "\n";
+            }
+
+            status += $"BulletPower: {bulletTimeLeft:0.0}s";
+        }
+
+        if (Time.time < stunPowerEndTime)
+        {
+            float stunTimeLeft = Mathf.Max(0f, stunPowerEndTime - Time.time);
+            if (!string.IsNullOrEmpty(status))
+            {
+                status += "\n";
+            }
+
+            status += $"StunPower: {stunTimeLeft:0.0}s";
+        }
+
+        GameUIManager.Instance.SetPowerStatus(status);
     }
 
     void ShootPowerBulletsAroundPlayer()

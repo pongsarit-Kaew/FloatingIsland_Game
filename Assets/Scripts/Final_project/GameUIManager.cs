@@ -16,6 +16,7 @@ public class GameUIManager : MonoBehaviour
     [Header("HUD Text")]
     public TMP_Text levelText;
     public TMP_Text waveText;
+    public TMP_Text powerStatusText;
     public TMP_Text completeText;
 
     private bool isPaused;
@@ -121,6 +122,14 @@ public class GameUIManager : MonoBehaviour
         if (waveText != null)
         {
             waveText.text = $"Wave {currentWave}/{totalWaves}";
+        }
+    }
+
+    public void SetPowerStatus(string status)
+    {
+        if (powerStatusText != null)
+        {
+            powerStatusText.text = status;
         }
     }
 
