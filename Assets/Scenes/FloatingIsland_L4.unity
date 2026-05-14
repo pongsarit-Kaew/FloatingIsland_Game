@@ -1801,8 +1801,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelFinish
   coinsPerLevel: 3
   requiredCoinsOverride: 0
-  bonusCoinsPerLevel: 1
-  bonusCoinsOverride: 0
 --- !u!1 &658744383
 GameObject:
   m_ObjectHideFlags: 0
@@ -4043,13 +4041,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnManager
   waves:
-  - totalSpawnEnemies: 4
+  - totalSpawnEnemies: 6
     numberOfRandomSpawnPoint: 3
     delayStart: 2
     spawnInterval: 1.5
-    numberOfPowerUp: 0
+    numberOfPowerUp: 1
     numberOfStunPower: 0
-    numberOfBulletPower: 1
+    numberOfBulletPower: 0
     numberOfCoins: 0
   - totalSpawnEnemies: 8
     numberOfRandomSpawnPoint: 3
@@ -4057,15 +4055,15 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 0
     numberOfStunPower: 1
-    numberOfBulletPower: 1
+    numberOfBulletPower: 0
     numberOfCoins: 0
   - totalSpawnEnemies: 12
     numberOfRandomSpawnPoint: 5
     delayStart: 2
     spawnInterval: 1.3
     numberOfPowerUp: 1
-    numberOfStunPower: 0
-    numberOfBulletPower: 1
+    numberOfStunPower: 1
+    numberOfBulletPower: 0
     numberOfCoins: 0
   - totalSpawnEnemies: 16
     numberOfRandomSpawnPoint: 5

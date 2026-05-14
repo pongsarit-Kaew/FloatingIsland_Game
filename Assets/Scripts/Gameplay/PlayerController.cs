@@ -131,8 +131,6 @@ public class PlayerController : MonoBehaviour
         {
             coinCount += amount;
         }
-
-        Debug.Log($"Coin: {coinCount} Bonus: {bonusCoinCount}");
     }
 
     void RestartLevel()

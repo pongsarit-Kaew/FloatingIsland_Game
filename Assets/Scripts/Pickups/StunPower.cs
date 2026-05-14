@@ -1,4 +1,4 @@
-using UnityEngine;
+๏ปฟusing UnityEngine;
 
 public class StunPower : MonoBehaviour
 {
@@ -6,21 +6,14 @@ public class StunPower : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // 1. ต้องเช็คว่า Player ติด Tag "Player" หรือยัง
-        if (other.CompareTag("Player"))
+        if (!other.CompareTag("Player")) return;
+
+        Enemy[] allEnemies = GameObject.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        foreach (Enemy enemy in allEnemies)
         {
-            Debug.Log("เก็บไอเทมได้แล้ว!"); // ใส่ไว้เช็คใน Console
-
-            // 2. หา Enemy ทั้งหมด (ใช้คำสั่งใหม่ของ Unity 6)
-            Enemy[] allEnemies = GameObject.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
-
-            foreach (Enemy e in allEnemies)
-            {
-                e.ApplyStun(stunDuration);
-            }
-
-            // 3. หายไปเมื่อเก็บ
-            Destroy(gameObject);
+            enemy.ApplyStun(stunDuration);
         }
+
+        Destroy(gameObject);
     }
 }

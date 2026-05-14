@@ -96,7 +96,6 @@ public class WaveSpawnManager : MonoBehaviour
             int waveIndex = waveListIndex + 1;
             bool isLastWave = waveListIndex == waves.Count - 1;
 
-            Debug.Log($"Start Wave {waveIndex}");
             if (GameUIManager.Instance != null)
             {
                 GameUIManager.Instance.SetWave(waveIndex, waves.Count);
@@ -132,11 +131,8 @@ public class WaveSpawnManager : MonoBehaviour
 
             yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("Enemy").Length == 0);
 
-            Debug.Log($"Clear Wave {waveIndex}");
-
             int coinsToDrop = isLastWave ? GetBaseCoinsToDrop(wave) : 0;
             int bonusCoinsToDrop = isLastWave ? GetLevelBonusCoins() : 0;
-            Debug.Log($"Wave {waveIndex} completed. Drop {coinsToDrop} coins and {bonusCoinsToDrop} bonus coins.");
             for (int coinIndex = 0; coinIndex < coinsToDrop; coinIndex++)
             {
                 SpawnCoinAtRandomPosition(false);
@@ -149,10 +145,8 @@ public class WaveSpawnManager : MonoBehaviour
         }
 
         int requiredCoins = GetRequiredCoins();
-        Debug.Log($"All waves cleared. Waiting for {requiredCoins} coins before opening finish portal.");
         yield return new WaitUntil(() => HasPlayerCollectedRequiredCoins(requiredCoins));
 
-        Debug.Log("Coin requirement met. Finish portal opened.");
         if (finishPortal != null)
         {
             finishPortal.SetActive(true);
@@ -294,7 +288,6 @@ public class WaveSpawnManager : MonoBehaviour
         }
 
         GameObject spawnedItem = Instantiate(prefab, randomPos, prefab.transform.rotation);
-        Debug.Log($"{itemName} {randomPos}");
         return spawnedItem;
     }
 

@@ -1801,8 +1801,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelFinish
   coinsPerLevel: 3
   requiredCoinsOverride: 0
-  bonusCoinsPerLevel: 1
-  bonusCoinsOverride: 0
 --- !u!1 &658744383
 GameObject:
   m_ObjectHideFlags: 0
@@ -4049,7 +4047,7 @@ MonoBehaviour:
     spawnInterval: 1.5
     numberOfPowerUp: 0
     numberOfStunPower: 0
-    numberOfBulletPower: 1
+    numberOfBulletPower: 0
     numberOfCoins: 3
   spawnPoints:
   - {fileID: 1425950354}
